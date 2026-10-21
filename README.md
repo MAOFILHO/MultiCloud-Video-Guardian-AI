@@ -119,7 +119,7 @@ Upload → API Gateway → Ingestion (S3) → SQS → Fast Screening
 ## Project Structure
 
 ```
-MultiCloud-Video-Guardian-AI/
+MultiCloud-Video-Guardian-AI/   # repo root
 ├── setup.py                          # Main orchestrator (run this)
 ├── .env.example                      # Environment variables template
 ├── requirements.txt                  # Python dependencies
@@ -189,9 +189,8 @@ MultiCloud-Video-Guardian-AI/
 
 
 ```bash
-# If using as a standalone project:
-git clone https://github.com/MAOFILHO/Portfolio-Projects.git
-cd Portfolio-Projects/MultiCloud-Video-Guardian-AI
+git clone https://github.com/MAOFILHO/MultiCloud-Video-Guardian-AI.git
+cd MultiCloud-Video-Guardian-AI
 
 # Install Python dependencies
 python3.11 -m venv .venv
@@ -500,11 +499,11 @@ python -m pytest tests/smoke/test_smoke.py -v
 
 ## GitHub Actions CI/CD
 
-A GitHub Actions workflow at `.github/workflows/guardian-ai-deploy.yml` automatically builds and deploys service images to AKS on every push to `MultiCloud-Video-Guardian-AI/services/**`.
+Two GitHub Actions workflows live in `.github/workflows/`: `ci.yml` (smoke tests + frontend build on every push/PR, no cloud access) and `deploy.yml`, which builds and deploys the service images to AKS and runs **manually only**. While this project lived in the `Portfolio-Projects` monorepo, the deploy ran automatically on pushes to `services/**`, `k8s/**` and `frontend/**`.
 
 ### Required GitHub Secrets
 
-Add at: `github.com/MAOFILHO/Portfolio-Projects → Settings → Secrets → Actions`
+Add at: `github.com/MAOFILHO/MultiCloud-Video-Guardian-AI → Settings → Secrets → Actions`
 
 - `ACR_USERNAME` — run: `az acr credential show --name guardianacr03211 --query username -o tsv`
 - `ACR_PASSWORD` — run: `az acr credential show --name guardianacr03211 --query 'passwords[0].value' -o tsv`
@@ -513,16 +512,16 @@ Add at: `github.com/MAOFILHO/Portfolio-Projects → Settings → Secrets → Act
 <img width="1396" height="747" alt="Screenshot 2026-06-13 at 11 01 23 AM" src="https://github.com/user-attachments/assets/f5ba4661-b796-427f-936a-11d5bb19ac2f" />
 
 
-### Trigger Automatically
+### Trigger Automatically (monorepo only)
 
-Push any change to a service file and the workflow runs automatically.
+In the monorepo, pushing a change to a service file ran the deploy workflow automatically. The standalone repo's `deploy.yml` is manual-only, so use the steps below.
 
 <img width="1695" height="886" alt="Screenshot 2026-06-13 at 12 25 18 PM" src="https://github.com/user-attachments/assets/f027fb76-c835-4ea8-b54a-6cef2f71eda9" />
 
 
 ### Trigger Manually
 
-GitHub UI: Actions tab → Guardian AI — Deploy to AKS → Run workflow
+GitHub UI: Actions tab → Deploy to AKS → Run workflow
 
 <img width="1432" height="379" alt="Screenshot 2026-06-13 at 9 51 23 AM" src="https://github.com/user-attachments/assets/31ea7939-2283-455c-afed-b1f098de4228" />
 
@@ -536,7 +535,7 @@ GitHub UI: Actions tab → Guardian AI — Deploy to AKS → Run workflow
 ### Important Notes
 
 - AKS must be running before deployment: `az aks start --name guardian-ai-aks --resource-group guardian-ai-prod`
-- Workflow only fires on changes under `MultiCloud-Video-Guardian-AI/services/**`, `k8s/**`, or `frontend/**`
+- The deploy workflow never fires on push; trigger it from the Actions tab
 - Rotate the `guardian-github-actions` SP secret annually
 
 
